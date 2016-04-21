@@ -1,0 +1,40 @@
+Name: Shunying Chen
+UPI: sche619
+
+
+
+Question 1:
+
++------+------+------+----------+----------------------+--------------+------------------+ 
+|      |      |      |          |                      |              |                  | 
+|  P1  |  P2  |  P3  |    P4    |          P3          |      P2      |        P1        | 
+|      |      |      |          |                      |              |                  | 
++------+------+------+----------+----------------------+--------------+------------------+ 
+0      1      2      3          8                      16             19                 26
+
+
+[0(p4) + 5(p3) + 14(p2) + 18(p1)] / 4 = 37 / 4 = 9.25 milliseconds
+
+
+
+Question 2:
+
+A real system can directly control the thread, but in Python, 
+It is generally a bad pattern to kill a thread abruptly, in Python and in any language. 
+For example:
+the thread is holding a critical resource that must be closed properly
+the thread has created several other threads that must be killed as well.
+The nice way of handling this in Python is to have an exit_request flag that each threads checks on regular interval to see if it is time for him to exit.
+
+Thread.stop is deprecated in Java because it is inherently unsafe. 
+Stopping a thread causes it to unlock all the monitors that it has locked. If any of the objects previously protected by these monitors were in an inconsistent state, other threads may now view these objects in an inconsistent state. Such objects are said to be damaged. When threads operate on damaged objects, arbitrary behavior can result. This behavior may be subtle and difficult to detect, or it may be pronounced. Unlike other unchecked exceptions, ThreadDeath kills threads silently; thus, the user has no warning that his program may be corrupted. The corruption can manifest itself at any time after the actual damage occurs, even hours or days in the future.
+The design of Python threading module is loosely based on Java's threading model. 
+However, where Java makes locks and condition variables basic behavior of every object, they are separate objects in Python. Python’s Thread class supports a subset of the behavior of Java’s Thread class; currently, there are no priorities, no thread groups, and threads cannot be destroyed, stopped, suspended, resumed, or interrupted. The static methods of Java’s Thread class, when implemented, are mapped to module-level functions.
+
+Since there are no similar limits on what the operating system and the scheduler/dispatcher, a real system would not require to check the process' state but a Python thread implementation does.
+
+If setting the thread 'daemon'(A boolean value indicating whether this thread is a daemon thread (True) or not (False)). Its initial value is inherited from the creating thread; the main thread is not a daemon thread and therefore all threads created in the main thread default to daemon = False. The entire Python program exits when no alive non-daemon threads are left.
+
+In Python, Daemon threads are abruptly stopped at shutdown. Their resources (such as open files, database transactions, etc.) may not be released properly. If we want threads to stop gracefully, make them non-daemonic and use a suitable signalling mechanism such as an Event.
+
+To get rid of this even when using Python threads, we can replace the uses of stop code by code that simply modifies some variable to indicate that the target thread should stop running. The target thread should check this variable regularly, and return from its run method in an orderly fashion if the variable indicates that it is to stop running. 
